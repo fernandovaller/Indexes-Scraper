@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Classe base para scrapers de índices econômicos."""
 
-import json
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -12,7 +11,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from utils import configurar_driver, parse_porcentagem
+from utils import configurar_driver, parse_porcentagem, retry, validar_e_salvar
 
 logger = logging.getLogger(__name__)
 
@@ -75,10 +74,13 @@ class BaseScraper:
             if own_driver and self.driver:
                 self.driver.quit()
 
+    @retry(max_attempts=3, base_delay=2.0, exceptions=Exception)
     def _carregar_pagina(self) -> None:
         """Carrega a página e espera a tabela principal aparecer.
 
         Subclasses podem sobrescrever para lógica de carregamento diferente.
+        Decorado com @retry: se a página não carregar ou a tabela não aparecer,
+        tenta novamente com backoff exponencial.
         """
         self.driver.get(self.url)
         self._wait_for((By.CSS_SELECTOR, "table.table-hover"))
@@ -200,12 +202,13 @@ class BaseScraper:
 
         return dados
 
-    def _salvar_json(self, dados: dict) -> None:
-        """Salva dados em JSON."""
-        self.arquivo_saida.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.arquivo_saida, "w", encoding="utf-8") as f:
-            json.dump(dados, f, ensure_ascii=False, indent=2)
-        logger.info(f"Dados salvos em: {self.arquivo_saida}")
+    def _salvar_json(self, dados: dict) -> tuple[bool, list[str]]:
+        """Valida dados contra JSON anterior e salva.
+
+        Returns:
+            Tupla (salvou, alertas). Anomalias não impedem salvamento.
+        """
+        return validar_e_salvar(dados, self.arquivo_saida)
 
     def _print_resumo(self, ultimos_meses: list, historico: dict) -> None:
         """Mostra resumo da extração."""

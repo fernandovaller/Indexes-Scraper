@@ -27,6 +27,7 @@ from base_scraper import BaseScraper
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import URLS, TITULOS, OUTPUT_FILES
+from utils import retry
 
 logger = logging.getLogger(__name__)
 
@@ -45,8 +46,12 @@ class SELICScraper(BaseScraper):
         )
         self._historico_cache: dict | None = None
 
+    @retry(max_attempts=3, base_delay=2.0, exceptions=Exception)
     def _carregar_pagina(self) -> None:
-        """Carrega a página e clica em "Ver tabela completa" para expandir histórico."""
+        """Carrega a página e clica em "Ver tabela completa" para expandir histórico.
+
+        Decorado com @retry: se a página não carregar, tenta novamente.
+        """
         self.driver.get(self.url)
         self._wait_for((By.CSS_SELECTOR, "table.table-hover"))
 
