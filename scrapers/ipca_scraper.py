@@ -16,10 +16,10 @@ class IPCAScraper(BaseScraper):
         )
 
 
-def run_ipca() -> bool:
+def run_ipca(driver=None) -> bool:
     """Função para executar scraper IPCA."""
     scraper = IPCAScraper()
-    return scraper.run()
+    return scraper.run(driver)
 
 
 if __name__ == "__main__":

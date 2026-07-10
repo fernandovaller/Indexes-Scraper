@@ -45,5 +45,5 @@ chromedriver
 chromedriver-*
 chrome-*
 
-# Output data (opcional - descomente se quiser ignorar)
+# Output data
 output/*.json

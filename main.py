@@ -16,6 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from scrapers import SCRAPERS
+from utils import configurar_driver
 
 logging.basicConfig(
     level=logging.INFO,
@@ -24,23 +25,48 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def _run_with_shared_driver(scraper_funcs: dict, names: list[str]) -> dict:
+    """Executa scrapers reusando uma única instância do WebDriver.
+
+    Args:
+        scraper_funcs: Dict {nome: função_run}.
+        names: Ordem dos nomes a executar.
+
+    Returns:
+        Dict {nome: sucesso (bool)}.
+    """
+    results = {}
+    try:
+        driver = configurar_driver()
+    except Exception as e:
+        logger.error(f"Erro ao configurar ChromeDriver: {e}")
+        for name in names:
+            results[name] = False
+        return results
+
+    try:
+        for name in names:
+            logger.info(f"\n{'='*50}")
+            logger.info(f"Scraper: {name.upper()}")
+            logger.info("=" * 50)
+            try:
+                results[name] = scraper_funcs[name](driver)
+            except Exception as e:
+                logger.error(f"Erro ao executar {name}: {e}")
+                results[name] = False
+    finally:
+        driver.quit()
+
+    return results
+
+
 def run_all() -> bool:
     """Executa todos os scrapers."""
     logger.info("=" * 50)
     logger.info("Executando todos os scrapers")
     logger.info("=" * 50)
 
-    results = {}
-    for name, scraper_func in SCRAPERS.items():
-        logger.info(f"\n{'='*50}")
-        logger.info(f"Scraper: {name.upper()}")
-        logger.info("=" * 50)
-        try:
-            results[name] = scraper_func()
-        except Exception as e:
-            logger.error(f"Erro ao executar {name}: {e}")
-            results[name] = False
-
+    results = _run_with_shared_driver(SCRAPERS, list(SCRAPERS.keys()))
     _print_resumo(results)
     return all(results.values())
 
@@ -48,21 +74,18 @@ def run_all() -> bool:
 def run_specific(names: list[str]) -> bool:
     """Executa scrapers específicos."""
     results = {}
+    valid_names = []
     for name in names:
         if name not in SCRAPERS:
             logger.error(f"Scraper desconhecido: {name}")
             logger.info(f"Disponíveis: {', '.join(SCRAPERS.keys())}")
             results[name] = False
             continue
+        valid_names.append(name)
 
-        logger.info(f"\n{'='*50}")
-        logger.info(f"Scraper: {name.upper()}")
-        logger.info("=" * 50)
-        try:
-            results[name] = SCRAPERS[name]()
-        except Exception as e:
-            logger.error(f"Erro ao executar {name}: {e}")
-            results[name] = False
+    if valid_names:
+        shared_results = _run_with_shared_driver(SCRAPERS, valid_names)
+        results.update(shared_results)
 
     _print_resumo(results)
     return all(results.values())

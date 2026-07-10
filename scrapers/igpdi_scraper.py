@@ -16,10 +16,10 @@ class IGPDIScraper(BaseScraper):
         )
 
 
-def run_igpdi() -> bool:
+def run_igpdi(driver=None) -> bool:
     """Função para executar scraper IGP-DI."""
     scraper = IGPDIScraper()
-    return scraper.run()
+    return scraper.run(driver)
 
 
 if __name__ == "__main__":

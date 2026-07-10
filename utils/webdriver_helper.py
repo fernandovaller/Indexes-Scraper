@@ -24,7 +24,7 @@ def configurar_driver():
     return webdriver.Chrome(service=service, options=chrome_options)
 
 
-def parse_porcentagem(valor_str):
+def parse_porcentagem(valor_str: str) -> float | None:
     """Converte string de porcentagem para float."""
     valor_str = valor_str.strip().replace("%", "").replace(",", ".")
     try:

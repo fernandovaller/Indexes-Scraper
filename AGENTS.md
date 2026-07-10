@@ -19,7 +19,7 @@ python -m scrapers.igpm_scraper
 - `config.py` - URLs map, titles, output paths. All scraper configs here.
 - `scrapers/__init__.py` - SCRAPERS registry. Add new scrapers here.
 - `scrapers/base_scraper.py` - Base class with Selenium + BeautifulSoup logic
-- `output/` - Generated JSON files (see .gitignore line 49 - currently commented out)
+- `output/` - Generated JSON files (gitignored)
 
 ## Adding a New Index
 
@@ -28,12 +28,13 @@ python -m scrapers.igpm_scraper
 3. Add output path to OUTPUT_FILES dict
 4. Create `scrapers/<name>_scraper.py` inheriting from BaseScraper
 5. Register in `scrapers/__init__.py` SCRAPERS dict
+6. `run_*()` function must accept `driver=None` param and pass it to `scraper.run(driver)`
 
 ## Dependencies
 
 - Python 3.8+
 - Google Chrome/Chromium (Selenium needs browser)
-- `pip install selenium webdriver-manager beautifulsoup4`
+- `pip install -r requirements.txt`
 
 ## Output Format
 

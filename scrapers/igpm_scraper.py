@@ -16,10 +16,10 @@ class IGPMScraper(BaseScraper):
         )
 
 
-def run_igpm() -> bool:
+def run_igpm(driver=None) -> bool:
     """Função para executar scraper IGP-M."""
     scraper = IGPMScraper()
-    return scraper.run()
+    return scraper.run(driver)
 
 
 if __name__ == "__main__":

@@ -16,10 +16,10 @@ class INCCDIScraper(BaseScraper):
         )
 
 
-def run_inccdi() -> bool:
+def run_inccdi(driver=None) -> bool:
     """Função para executar scraper INCC-DI."""
     scraper = INCCDIScraper()
-    return scraper.run()
+    return scraper.run(driver)
 
 
 if __name__ == "__main__":

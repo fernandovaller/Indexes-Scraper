@@ -16,10 +16,10 @@ class INPCScraper(BaseScraper):
         )
 
 
-def run_inpc() -> bool:
+def run_inpc(driver=None) -> bool:
     """Função para executar scraper INPC."""
     scraper = INPCScraper()
-    return scraper.run()
+    return scraper.run(driver)
 
 
 if __name__ == "__main__":

@@ -16,10 +16,10 @@ class IVARScraper(BaseScraper):
         )
 
 
-def run_ivar() -> bool:
+def run_ivar(driver=None) -> bool:
     """Função para executar scraper IVAR."""
     scraper = IVARScraper()
-    return scraper.run()
+    return scraper.run(driver)
 
 
 if __name__ == "__main__":
